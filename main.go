@@ -11,7 +11,7 @@ func main() {
     guy.Name = "xzxc"
     guy.Gender = 1
     guy.Rating = 4.5
-    guy.Userid = "100"
+    guy.Userid = "101"
 
     var pool PoolPost
     pool.User = guy
@@ -34,6 +34,11 @@ func main() {
     //}
 
     err = joinPool(guy, "XkJ1smdXIY6uTA1JxSDf", pools)
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    err = leavePool(guy, "XkJ1smdXIY6uTA1JxSDf", pools)
     if err != nil {
         fmt.Println(err)
     }

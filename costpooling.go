@@ -22,10 +22,10 @@ func createPool(pool PoolPost, collection *firestore.CollectionRef) error {
     return nil
 }
 
-func joinPool(user User, poolId string, collenction *firestore.CollectionRef) error {
-    docRef, doc, err := getDocRef(collenction, poolId)
+func joinPool(user User, poolId string, collection *firestore.CollectionRef) error {
+    docRef, doc, err := getDocRef(collection, poolId)
     if err != nil {
-        return fmt.Errorf("Document could not reach the queary: %v", err)
+        return fmt.Errorf("Document could be found: %v", err)
     }
 
     var data PoolPost
@@ -36,6 +36,23 @@ func joinPool(user User, poolId string, collenction *firestore.CollectionRef) er
         if idx := findUser(user, data.Requests); idx != -1 {
             data.Requests = removeUser(idx, data.Requests)
         }
+        updateDoc(docRef, data)
+    }
+
+    return nil
+}
+
+func leavePool(user User, poolId string, collection *firestore.CollectionRef) error {
+    docRef, doc, err := getDocRef(collection, poolId)
+    if err != nil {
+        return fmt.Errorf("Document could be found: %v", err)
+    }
+
+    var data PoolPost
+    doc.DataTo(&data)
+
+    if idx := findUser(user, data.Members); idx != -1 {
+        data.Members = removeUser(idx, data.Members)
         updateDoc(docRef, data)
     }
 
