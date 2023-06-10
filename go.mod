@@ -1,4 +1,4 @@
-module mdp
+module ShaRide
 
 go 1.19
 

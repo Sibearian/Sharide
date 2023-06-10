@@ -4,42 +4,58 @@ package main
 import (
 	"fmt"
 	"log"
+    "ShaRide/db"
+    model "ShaRide/models"
+    "ShaRide/pool"
 )
 
 func main() {
-    var guy  User
+    var guy  model.User
     guy.Name = "xzxc"
     guy.Gender = 1
     guy.Rating = 4.5
     guy.Userid = "101"
 
-    var pool PoolPost
-    pool.User = guy
-    pool.Loc  = Location{12.939756, 77.565426}
-    pool.Seats = 3
+    var sharePool pool.Pool
+    sharePool.User = guy
+    sharePool.Start = model.Location{Lat: 12.939756, Lng: 77.565426, GeoHash: "hh"}
+    sharePool.End = model.Location{Lat: 12.950123, Lng: 77.573864, GeoHash: "df"}
+    sharePool.Seats = 3
+    sharePool.Start.Hash()
+    sharePool.End.Hash()
 
-    app, err := createNewApp()
+    fmt.Print("Hello\n\n")
+
+    app, err := db.CreateNewApp()
     if err != nil {
         log.Fatal(err)
     }
 
-    firestore, err := createFirestore(app)
+    firestore, err := db.CreateFirestore(app)
     if err != nil {
         log.Fatal(err)
     }
+    defer firestore.Close()
 
-    pools := getCollectionRef(firestore, "pools")
-    // if err := createPool(pool, pools); err != nil{
-    //    log.Fatal(err)
-    //}
+    pools := db.GetCollectionRef(firestore, "pools")
 
-    err = joinPool(guy, "XkJ1smdXIY6uTA1JxSDf", pools)
-    if err != nil {
-        fmt.Println(err)
-    }
+    err = pool.CreatePool(sharePool, pools)
 
-    err = leavePool(guy, "XkJ1smdXIY6uTA1JxSDf", pools)
-    if err != nil {
-        fmt.Println(err)
-    }
+    // err = pool.JoinPool(guy, "XkJ1smdXIY6uTA1JxSDf", pools)
+    // if err != nil {
+        // fmt.Println(err)
+    // }
+// 
+    // err = pool.LeavePool(guy, "XkJ1smdXIY6uTA1JxSDf", pools)
+    // if err != nil {
+        // fmt.Println(err)
+    // }
+// 
+    // snaps, err := pool.GetExactPools(model.Location{Lat: 12.939756, Lng: 77.565426, GeoHash: "hh"}, model.Location{Lat: 12.950123, Lng: 77.573864, GeoHash: "df"}, pools)
+// 
+    // if err != nil {
+        // fmt.Println(err)
+    // }
+// 
+    // fmt.Printf("Got these Pools :\n%v\n", snaps)
 }

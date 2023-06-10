@@ -1,5 +1,5 @@
 // function to manage the firebase fucntions
-package main
+package db
 
 import (
 	"context"
@@ -16,7 +16,7 @@ func init(){
 }
 
 
-func createNewApp() (*firebase.App, error) {
+func CreateNewApp() (*firebase.App, error) {
     conf := &firebase.Config{ProjectID: "mdp-bmsce"}
 
     app, err := firebase.NewApp(ctx, conf)
@@ -28,7 +28,7 @@ func createNewApp() (*firebase.App, error) {
 }
 
 
-func createFirestore(app *firebase.App) (*firestore.Client, error) {
+func CreateFirestore(app *firebase.App) (*firestore.Client, error) {
     client, err := app.Firestore(ctx)
     if err != nil {
         return nil, fmt.Errorf("Failed to create firestore: %v", err)
@@ -37,13 +37,7 @@ func createFirestore(app *firebase.App) (*firestore.Client, error) {
     return client, nil
 }
 
-
-func getCollectionRef(client *firestore.Client, collection string) *firestore.CollectionRef {
-    return client.Collection(collection)
-}
-
-
-func addDoc(collection *firestore.CollectionRef, data interface{}) error {
+func AddDoc(collection *firestore.CollectionRef, data interface{}) error {
     _, _, err := collection.Add(ctx, data)
     if err != nil {
         return fmt.Errorf("An error has occured while adding the document: %v", err)
@@ -52,7 +46,7 @@ func addDoc(collection *firestore.CollectionRef, data interface{}) error {
 }
 
 
-func updateDoc(docRef *firestore.DocumentRef, data interface{}) error {
+func UpdateDoc(docRef *firestore.DocumentRef, data interface{}) error {
     _, err := docRef.Set(ctx, data)
     if err != nil {
         return fmt.Errorf("Could not update the document: %v", err)
@@ -61,13 +55,3 @@ func updateDoc(docRef *firestore.DocumentRef, data interface{}) error {
 }
 
 
-func getDocRef(collection *firestore.CollectionRef, docId string) (*firestore.DocumentRef, *firestore.DocumentSnapshot, error) {
-    docRef := collection.Doc(docId)
-
-    doc, err := docRef.Get(ctx)
-    if err != nil {
-        return docRef, nil, fmt.Errorf("In getDocRef: %v", err)
-    }
-
-    return docRef, doc, nil
-}
