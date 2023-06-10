@@ -1,30 +1,30 @@
 package main
 
 import (
+	"encoding/json"
 	"math"
-	"time"
 )
 
-type Gender uint8
+type User struct{
+    Userid  string  `firestore:"userid" json:"userid"`
+    Name    string  `firestore:"name" json:"name"`
+    Gender  uint8   `firestore:"gender" json:"gender"`
+    Rating  float32 `firestore:"rating" json:"rating"`
+}
 
-const (
-    male Gender = iota
-    female
-    any
-)
 
-type PoolRequestMember struct {
-    ReqTime             time.Time   `json:"reqTime"`
-    Name                string      `json:"name"`
-    PickUp              Location    `json:"pickup"`
-    DropOff             Location    `json:"drop"`
-    Gender                          `json:"gender"`
-    WaitTillSeconds     int32       `json:"wait"`
+type PoolPost struct {
+    User
+    Seats       uint8       `firestore:"seats" json:"seats"`
+    Loc         Location    `firestore:"loc" json:"loc"`
+    Geohash     string      `firestore:"geohash" json:"geohash"`
+    Requests    []User    `firestore:"participants" json:"participants"`
+    Members     []User    `firestore:"members" json:"members"`
 }
 
 type Location struct {
-    Lat     float64 `json:"lat"`
-    Lng     float64 `json:"lng"`
+    Lat     float64 `json:"lat" firestore:"lat"`
+    Lng     float64 `json:"lng" firestore:"Lng"`
 }
 
 func (a Location) DistanceTo(b Location) float64 {
@@ -35,4 +35,14 @@ func (a Location) DistanceTo(b Location) float64 {
     var difflon = (a.Lng - b.Lng) * (math.Pi / 180)
 
     return 2 * 6371.07103 * math.Asin(math.Sqrt(math.Sin(difflat / 2) * math.Sin(difflat / 2) + math.Cos(rlat1) * math.Cos(rlat2) * math.Sin(rlat2) * math.Sin(difflon / 2) * math.Sin(difflon / 2)))
+}
+
+
+func structToMap(obj interface{}) (newMap map[string]interface{}, err error) {
+    data, err := json.Marshal(obj) // Convert to a json string
+    if err != nil {
+        return
+    }
+    err = json.Unmarshal(data, &newMap) // Convert to a map
+    return
 }
