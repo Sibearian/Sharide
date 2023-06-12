@@ -37,12 +37,12 @@ func CreateFirestore(app *firebase.App) (*firestore.Client, error) {
     return client, nil
 }
 
-func AddDoc(collection *firestore.CollectionRef, data interface{}) error {
-    _, _, err := collection.Add(ctx, data)
+func AddDoc(collection *firestore.CollectionRef, data interface{}) (*firestore.DocumentRef, error) {
+    docRef, _, err := collection.Add(ctx, data)
     if err != nil {
-        return fmt.Errorf("An error has occured while adding the document: %v", err)
+        return nil, fmt.Errorf("An error has occured while adding the document: %v", err)
     }
-    return nil
+    return docRef, nil
 }
 
 

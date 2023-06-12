@@ -9,6 +9,7 @@ type Pool struct {
     Seats       uint8           `firestore:"seats" json:"seats"`
     Time        int64           `firestore:"time_posted" json:"time_posted"`
     TTL         int64           `firestore:"wait_till" json:"wait_till"`
+    PrefGender  uint8           `firestore:"pref_gender" json:"pref_gender"`
     Start       model.Location  `firestore:"start" json:"start"`
     End         model.Location  `firestore:"drop" json:"drop"`
     Requests    []model.User    `firestore:"requests" json:"requests"`

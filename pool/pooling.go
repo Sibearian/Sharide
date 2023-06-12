@@ -9,14 +9,14 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-func CreatePool(pool Pool, collection *firestore.CollectionRef) error {
+func CreatePool(pool Pool, collection *firestore.CollectionRef) (*firestore.DocumentRef, error) {
     pool.Start.Hash()
     pool.End.Hash()
-
-    if err := db.AddDoc(collection, pool); err != nil {
-        return fmt.Errorf("Failed to add a new document to the firestore doc - \n%v\n: %v", pool, err)
+    docRef, err := db.AddDoc(collection, pool)
+    if err != nil {
+        return nil, fmt.Errorf("Failed to add a new document to the firestore doc - \n%v\n: %v", pool, err)
     }
-    return nil
+    return docRef, nil
 }
 
 
