@@ -9,8 +9,6 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-
-
 func CreatePool(pool Pool, collection *firestore.CollectionRef) error {
     pool.Start.Hash()
     pool.End.Hash()
