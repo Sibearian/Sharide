@@ -2,13 +2,13 @@
 package app
 
 import (
-	"ShaRide/models"
 	"ShaRide/pool"
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
+
+// Api Handel for creating pool endpoint
 func createPool(w http.ResponseWriter, r *http.Request){
     var newPool pool.Pool
     err := json.NewDecoder(r.Body).Decode(&newPool)
@@ -16,7 +16,8 @@ func createPool(w http.ResponseWriter, r *http.Request){
         w.WriteHeader(http.StatusBadRequest)
         w.Header().Set("Content-Type", "application/json")
         json.NewEncoder(w).Encode(map[string]string{
-            "Status"  : fmt.Sprint(err),
+            "status"  : "ERROR",
+            "error"   : "json is in wrong format",
         })
         return
     }
@@ -26,7 +27,8 @@ func createPool(w http.ResponseWriter, r *http.Request){
         w.WriteHeader(http.StatusInternalServerError)
         w.Header().Set("Content-Type", "application/json")
         json.NewEncoder(w).Encode(map[string]string{
-            "Status"  : fmt.Sprint(err),
+            "status"  : "ERROR",
+            "error"   : "Server Error",
         })
         return
     }
@@ -40,14 +42,17 @@ func createPool(w http.ResponseWriter, r *http.Request){
 
 }
 
+
+// Api Handel for joining pool endpoint
 func joinPool(w http.ResponseWriter, r *http.Request) {
-    var userReq models.JoinPoolReq
+    var userReq PoolReq
     err := json.NewDecoder(r.Body).Decode(&userReq)
     if err != nil {
         w.WriteHeader(http.StatusBadRequest)
         w.Header().Set("Content-Type", "application/json")
         json.NewEncoder(w).Encode(map[string]string{
-            "Status"  : fmt.Sprint(err),
+            "status"  : "ERROR",
+            "error"   : "json is in wrong format",
         })
         return
     }
@@ -56,7 +61,8 @@ func joinPool(w http.ResponseWriter, r *http.Request) {
         w.WriteHeader(http.StatusInternalServerError)
         w.Header().Set("Content-Type", "application/json")
         json.NewEncoder(w).Encode(map[string]string{
-            "Status"  : fmt.Sprint(err),
+            "status"  : "ERROR",
+            "error"   : "Server Error",
         })
         return
     }
@@ -67,4 +73,36 @@ func joinPool(w http.ResponseWriter, r *http.Request) {
         "Status" : "OK",
     })
     
+}
+
+// Api Handel for leave pool endpoint
+func leavePool(w http.ResponseWriter, r *http.Request) {
+    var userReq PoolReq
+
+    err := json.NewDecoder(r.Body).Decode(&userReq)
+    if err != nil {
+        w.WriteHeader(http.StatusBadRequest)
+        w.Header().Set("Content-Type", "application/json")
+        json.NewEncoder(w).Encode(map[string]string{
+            "status"  : "ERROR",
+            "error"   : "json is in wrong format",
+        })
+        return
+    }
+
+    if err = pool.LeavePool(userReq.ReqUser, userReq.PoolId, poolRef); err != nil {
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Header().Set("Content-Type", "application/json")
+        json.NewEncoder(w).Encode(map[string]string{
+            "status"  : "ERROR",
+            "error"   : "Server Error",
+        })
+        return
+    }
+
+    w.WriteHeader(http.StatusOK)
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(map[string]string{
+        "Status" : "OK",
+    })
 }

@@ -19,11 +19,6 @@ type Location struct {
     GeoHash    string  `json:"hash" firestore:"hash"`
 }
 
-type JoinPoolReq struct {
-    ReqUser User    `json:"user"`
-    PoolId  string  `json:"pool_id"`
-}
-
 func (a Location) DistanceTo(b Location) float64 {
     var rlat1 float64 = a.Lat * (math.Pi / 180)
     var rlat2 float64 = b.Lat * (math.Pi / 180)
