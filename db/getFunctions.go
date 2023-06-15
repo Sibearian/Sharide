@@ -22,7 +22,6 @@ func GetDocRef(collection *firestore.CollectionRef, docId string) (*firestore.Do
     return docRef, doc, nil
 }
 
-func GetQueryDocs(collection *firestore.CollectionRef, filter firestore.EntityFilter) ([]*firestore.DocumentSnapshot, error){
-    q := collection.WhereEntity(filter)
+func GetQueryDocs(q firestore.Query) ([]*firestore.DocumentSnapshot, error){
     return q.Documents(ctx).GetAll()
 }

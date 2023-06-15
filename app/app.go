@@ -27,19 +27,16 @@ func Start(){
     if err != nil {
         log.Fatal(err)
     }
+    defer fs.Close()
 
     poolRef = db.GetCollectionRef(fs, "pools")
 
     // Pool apis
     router.HandleFunc("/pool/create", createPool).Methods("POST")
-
-    router.HandleFunc("pool/join", joinPool).Methods("POST")
-    router.HandleFunc("pool/leave", leavePool).Methods("POST")
+    router.HandleFunc("/pool/join", joinPool).Methods("POST")
+    router.HandleFunc("/pool/leave", leavePool).Methods("POST")
+    router.HandleFunc("/pool/getpools", getPools).Methods("POST")
     
-    router.HandleFunc("/exit", exit).Methods("POST")
     log.Fatal(http.ListenAndServe(":8080", router))
 }
 
-func exit(w http.ResponseWriter, r *http.Request){
-    fs.Close()
-}

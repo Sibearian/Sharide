@@ -2,12 +2,13 @@
 package pool
 
 import (
+	"ShaRide/db"
+	model "ShaRide/models"
 	"fmt"
-    "ShaRide/db"
-    model "ShaRide/models"
 
 	"cloud.google.com/go/firestore"
 )
+
 
 func CreatePool(pool Pool, collection *firestore.CollectionRef) (*firestore.DocumentRef, error) {
     pool.Start.Hash()
@@ -20,7 +21,7 @@ func CreatePool(pool Pool, collection *firestore.CollectionRef) (*firestore.Docu
 }
 
 
-func JoinPool(user model.User, poolId string, collection *firestore.CollectionRef) error {
+func JoinPool(user model.UserSlice, poolId string, collection *firestore.CollectionRef) error {
     docRef, doc, err := db.GetDocRef(collection, poolId)
     if err != nil {
         return fmt.Errorf("Document could be found: %v", err)
@@ -41,7 +42,7 @@ func JoinPool(user model.User, poolId string, collection *firestore.CollectionRe
 }
 
 
-func LeavePool(user model.User, poolId string, collection *firestore.CollectionRef) error {
+func LeavePool(user model.UserSlice, poolId string, collection *firestore.CollectionRef) error {
     docRef, doc, err := db.GetDocRef(collection, poolId)
     if err != nil {
         return fmt.Errorf("Document could be found: %v", err)
@@ -56,4 +57,64 @@ func LeavePool(user model.User, poolId string, collection *firestore.CollectionR
     }
 
     return nil
+}
+
+
+func GetPools(gender uint8, start, end model.Location, distance float64, poolRef *firestore.CollectionRef) (res []Pool, err error) {
+    start.Hash()
+    end.Hash()
+
+    var startHashs []string
+    if distance <= 150 {
+        startHashs = []string{start.GeoHash}
+    } else if distance <= 300 {
+        startHashs = get300mBox(start.GeoHash)
+    } else if distance <= 600 {    
+        startHashs = get600mBox(start.GeoHash)
+    } else {
+        startHashs = []string{start.GeoHash[0:len(start.GeoHash) -1]}
+    }
+
+    startQuery := firestore.PropertyFilter{
+        Path: "start.hash",
+        Operator: "in",
+        Value: startHashs,
+    }
+
+    genderFilter    := firestore.PropertyFilter{
+        Path: "pref_gender",
+        Operator: "==",
+        Value: gender,
+    }
+
+    statusFilter    := firestore.PropertyFilter{
+        Path: "ride_status",
+        Operator: "==",
+        Value: 0,
+    }
+
+    query := firestore.AndFilter{
+        Filters: []firestore.EntityFilter{startQuery, genderFilter, statusFilter},
+    }
+
+    docs, err := db.GetQueryDocs(poolRef.WhereEntity(query))
+    if err != nil {
+        return nil, err
+    }
+
+    var pool Pool
+    var box BoundingBox = GetBoundingBox(end.Lat, end.Lng, distance)
+    fmt.Println(box)
+    for _, doc := range docs {
+        doc.DataTo(&pool)
+        fmt.Println(pool.End)
+        if pool.End.DistanceTo(end) <= distance {
+            res = append(res, pool)
+        }
+        fmt.Printf("res : %v\n\n", res)
+    }
+
+
+    return res, nil
+    
 }

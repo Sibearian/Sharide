@@ -4,18 +4,16 @@ package app
 import (
 	"ShaRide/pool"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
-
 
 // Api Handel for creating pool endpoint
 func createPool(w http.ResponseWriter, r *http.Request){
     var newPool pool.Pool
     err := json.NewDecoder(r.Body).Decode(&newPool)
     if err != nil {
-        w.WriteHeader(http.StatusBadRequest)
-        w.Header().Set("Content-Type", "application/json")
-        json.NewEncoder(w).Encode(map[string]string{
+        sendData(w, http.StatusBadRequest, map[string]string{
             "status"  : "ERROR",
             "error"   : "json is in wrong format",
         })
@@ -24,22 +22,18 @@ func createPool(w http.ResponseWriter, r *http.Request){
 
     docRef, err := pool.CreatePool(newPool, poolRef)
     if err != nil {
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Header().Set("Content-Type", "application/json")
-        json.NewEncoder(w).Encode(map[string]string{
+        sendData(w, http.StatusInternalServerError, map[string]string{
             "status"  : "ERROR",
             "error"   : "Server Error",
         })
         return
     }
 
-    w.WriteHeader(http.StatusOK)
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(map[string]string{
+    sendData(w, http.StatusOK, map[string]string{
         "pool_id" : docRef.ID,
         "Status"  : "OK",
     })
-
+    return 
 }
 
 
@@ -48,31 +42,25 @@ func joinPool(w http.ResponseWriter, r *http.Request) {
     var userReq PoolReq
     err := json.NewDecoder(r.Body).Decode(&userReq)
     if err != nil {
-        w.WriteHeader(http.StatusBadRequest)
-        w.Header().Set("Content-Type", "application/json")
-        json.NewEncoder(w).Encode(map[string]string{
+        sendData(w, http.StatusBadRequest, map[string]string{
             "status"  : "ERROR",
             "error"   : "json is in wrong format",
         })
         return
     }
 
-    if err = pool.JoinPool(userReq.ReqUser, userReq.PoolId, poolRef); err != nil {
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Header().Set("Content-Type", "application/json")
-        json.NewEncoder(w).Encode(map[string]string{
+    if err = pool.JoinPool(userReq.User, userReq.PoolId, poolRef); err != nil {
+        sendData(w, http.StatusInternalServerError, map[string]string{
             "status"  : "ERROR",
             "error"   : "Server Error",
         })
         return
     }
     
-    w.WriteHeader(http.StatusOK)
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(map[string]string{
-        "Status" : "OK",
+    sendData(w, http.StatusOK, map[string]string{
+        "Status"  : "OK",
     })
-    
+    return 
 }
 
 // Api Handel for leave pool endpoint
@@ -81,28 +69,51 @@ func leavePool(w http.ResponseWriter, r *http.Request) {
 
     err := json.NewDecoder(r.Body).Decode(&userReq)
     if err != nil {
-        w.WriteHeader(http.StatusBadRequest)
-        w.Header().Set("Content-Type", "application/json")
-        json.NewEncoder(w).Encode(map[string]string{
+        sendData(w, http.StatusBadRequest, map[string]string{
             "status"  : "ERROR",
             "error"   : "json is in wrong format",
         })
         return
     }
 
-    if err = pool.LeavePool(userReq.ReqUser, userReq.PoolId, poolRef); err != nil {
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Header().Set("Content-Type", "application/json")
-        json.NewEncoder(w).Encode(map[string]string{
+    if err = pool.LeavePool(userReq.User, userReq.PoolId, poolRef); err != nil {
+        sendData(w, http.StatusInternalServerError, map[string]string{
             "status"  : "ERROR",
             "error"   : "Server Error",
         })
         return
     }
 
-    w.WriteHeader(http.StatusOK)
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(map[string]string{
-        "Status" : "OK",
+    sendData(w, http.StatusOK, map[string]string{
+        "Status"  : "OK",
     })
+    return 
+}
+
+// handle for getting all the pools
+func getPools(w http.ResponseWriter, r *http.Request) {
+    var poolReq ReqPools
+
+    err := json.NewDecoder(r.Body).Decode(&poolReq)
+    if err != nil {
+        sendData(w, http.StatusBadRequest, map[string]string{
+            "status"  : "ERROR",
+            "error"   : "json is in wrong format",
+        })
+        return
+    }
+
+    pools, err := pool.GetPools(poolReq.User.Gender, poolReq.SLoc, poolReq.SLoc, poolReq.Dist, poolRef)
+    if err != nil {
+        sendData(w, http.StatusInternalServerError, map[string]string{
+            "status"  : "ERROR", 
+            "error"   : fmt.Sprintf("%v", err),
+        })
+        return
+    }
+
+    sendData(w, http.StatusOK, map[string][]pool.Pool {
+        "pools"   : pools,
+    })
+    return 
 }

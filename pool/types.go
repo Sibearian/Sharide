@@ -5,13 +5,17 @@ import (
 )
 
 type Pool struct {
-    model.User
-    Seats       uint8           `firestore:"seats" json:"seats"`
-    Time        int64           `firestore:"time_posted" json:"time_posted"`
-    TTL         int64           `firestore:"wait_till" json:"wait_till"`
-    PrefGender  uint8           `firestore:"pref_gender" json:"pref_gender"`
-    Start       model.Location  `firestore:"start" json:"start"`
-    End         model.Location  `firestore:"drop" json:"drop"`
-    Requests    []model.User    `firestore:"requests" json:"requests"`
-    Members     []model.User    `firestore:"members" json:"members"`
+    User        string              `firestore:"userid" json:"userid"`
+    Seats       uint8               `firestore:"seats" json:"seats"`
+    PrefGender  uint8               `firestore:"pref_gender" json:"pref_gender"`
+    RideStatus  uint8               `firestore:"ride_status" json:"status"`
+
+    Time        int64               `firestore:"time_posted" json:"time_posted"`
+    TTL         int64               `firestore:"wait_till" json:"wait_till"`
+    CompletedT  int64               `firestore:"pool_complition"`
+
+    Start       model.Location      `firestore:"start" json:"start"`
+    End         model.Location      `firestore:"drop" json:"drop"`
+    Requests    []model.UserSlice   `firestore:"requests" json:"requests"`
+    Members     []model.UserSlice   `firestore:"members" json:"members"`
 }
