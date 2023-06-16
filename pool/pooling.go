@@ -60,9 +60,9 @@ func LeavePool(user model.UserSlice, poolId string, collection *firestore.Collec
 }
 
 
-func GetPools(gender uint8, start, end model.Location, distance float64, poolRef *firestore.CollectionRef) (res []Pool, err error) {
+func GetPools(gender uint8, start, end model.Location, distance float64, poolRef *firestore.CollectionRef) (map[string]Pool, error) {
     start.Hash()
-    end.Hash()
+    var res = make(map[string]Pool)
 
     var startHashs []string
     if distance <= 150 {
@@ -103,18 +103,36 @@ func GetPools(gender uint8, start, end model.Location, distance float64, poolRef
     }
 
     var pool Pool
-    var box BoundingBox = GetBoundingBox(end.Lat, end.Lng, distance)
-    fmt.Println(box)
     for _, doc := range docs {
-        doc.DataTo(&pool)
-        fmt.Println(pool.End)
-        if pool.End.DistanceTo(end) <= distance {
-            res = append(res, pool)
+        err := doc.DataTo(&pool)
+        if err != nil {
+            continue
         }
-        fmt.Printf("res : %v\n\n", res)
+        if pool.End.DistanceTo(end) <= distance && len(pool.Members) < int(pool.Seats) {
+            res[doc.Ref.ID] = pool
+        }
     }
-
-
     return res, nil
-    
+}
+
+func StartPool(poolid string, poolRef *firestore.CollectionRef) error {
+    return db.UpdateDocField(poolRef, poolid, []firestore.Update{
+        {
+            Path: "ride_status",
+            Value: 1,
+        },
+    })
+}
+
+func EndPool(poolid string, poolRef *firestore.CollectionRef) error {
+    return db.UpdateDocField(poolRef, poolid, []firestore.Update{
+        {
+            Path: "ride_status",
+            Value: 2,
+        },
+        {
+            Path: "pool_complition_time",
+            Value: firestore.ServerTimestamp,
+        },
+    })
 }

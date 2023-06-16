@@ -12,7 +12,7 @@ type Pool struct {
 
     Time        int64               `firestore:"time_posted" json:"time_posted"`
     TTL         int64               `firestore:"wait_till" json:"wait_till"`
-    CompletedT  int64               `firestore:"pool_complition"`
+    CompletedT  int64               `firestore:"pool_complition_time"`
 
     Start       model.Location      `firestore:"start" json:"start"`
     End         model.Location      `firestore:"drop" json:"drop"`

@@ -14,6 +14,7 @@ type PoolReq struct {
 
 type ReqPools struct {
     User    models.User     `firestore:"user" json:"user"`
+    Pref    uint8           `json:"pref_gender"`
     Dist    float64         `json:"dist"`
     SLoc    models.Location `firestore:"start_location" json:"start_location"`
     ELoc    models.Location `firestore:"end_location" json:"end_location"`

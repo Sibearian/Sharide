@@ -33,9 +33,12 @@ func Start(){
 
     // Pool apis
     router.HandleFunc("/pool/create", createPool).Methods("POST")
-    router.HandleFunc("/pool/join", joinPool).Methods("POST")
+    router.HandleFunc("/pool/let_join", joinPool).Methods("POST")
     router.HandleFunc("/pool/leave", leavePool).Methods("POST")
     router.HandleFunc("/pool/getpools", getPools).Methods("POST")
+    router.HandleFunc("/pool/start", startPool).Methods("POST")
+    router.HandleFunc("/pool/end", endPool).Methods("POST")
+
     
     log.Fatal(http.ListenAndServe(":8080", router))
 }
