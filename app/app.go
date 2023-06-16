@@ -38,6 +38,7 @@ func Start(){
     router.HandleFunc("/pool/getpools", getPools).Methods("POST")
     router.HandleFunc("/pool/start", startPool).Methods("POST")
     router.HandleFunc("/pool/end", endPool).Methods("POST")
+    router.HandleFunc("/pool/req_join", reqPool).Methods("POST")
 
     
     log.Fatal(http.ListenAndServe(":8080", router))

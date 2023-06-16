@@ -170,3 +170,30 @@ func endPool(w http.ResponseWriter, r *http.Request) {
     })
     return 
 }
+
+
+// Api Handel for joining pool endpoint
+func reqPool(w http.ResponseWriter, r *http.Request) {
+    var userReq PoolReq
+    err := json.NewDecoder(r.Body).Decode(&userReq)
+    if err != nil {
+        sendData(w, http.StatusBadRequest, map[string]string{
+            "status"  : "ERROR",
+            "error"   : "json is in wrong format",
+        })
+        return
+    }
+
+    if err = pool.ReqJoinPool(userReq.User, userReq.PoolId, poolRef); err != nil {
+        sendData(w, http.StatusInternalServerError, map[string]string{
+            "status"  : "ERROR",
+            "error"   : "Server Error",
+        })
+        return
+    }
+    
+    sendData(w, http.StatusOK, map[string]string{
+        "Status"  : "OK",
+    })
+    return 
+}

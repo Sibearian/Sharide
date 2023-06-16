@@ -20,46 +20,6 @@ func CreatePool(pool Pool, collection *firestore.CollectionRef) (*firestore.Docu
     return docRef, nil
 }
 
-
-func JoinPool(user model.UserSlice, poolId string, collection *firestore.CollectionRef) error {
-    docRef, doc, err := db.GetDocRef(collection, poolId)
-    if err != nil {
-        return fmt.Errorf("Document could be found: %v", err)
-    }
-
-    var data Pool
-    doc.DataTo(&data)
-
-    if FindUser(user, data.Members) == -1 {
-        data.Members = append(data.Members, user)
-        if idx := FindUser(user, data.Requests); idx != -1 {
-            data.Requests = RemoveUser(idx, data.Requests)
-        }
-        db.UpdateDoc(docRef, data)
-    }
-
-    return nil
-}
-
-
-func LeavePool(user model.UserSlice, poolId string, collection *firestore.CollectionRef) error {
-    docRef, doc, err := db.GetDocRef(collection, poolId)
-    if err != nil {
-        return fmt.Errorf("Document could be found: %v", err)
-    }
-
-    var data Pool
-    doc.DataTo(&data)
-
-    if idx := FindUser(user, data.Members); idx != -1 {
-        data.Members = RemoveUser(idx, data.Members)
-        db.UpdateDoc(docRef, data)
-    }
-
-    return nil
-}
-
-
 func GetPools(gender uint8, start, end model.Location, distance float64, poolRef *firestore.CollectionRef) (map[string]Pool, error) {
     start.Hash()
     var res = make(map[string]Pool)
@@ -135,4 +95,75 @@ func EndPool(poolid string, poolRef *firestore.CollectionRef) error {
             Value: firestore.ServerTimestamp,
         },
     })
+}
+
+
+func JoinPool(user model.UserSlice, poolId string, collection *firestore.CollectionRef) error {
+    docRef, doc, err := db.GetDocRef(collection, poolId)
+    if err != nil {
+        return fmt.Errorf("Document could be found: %v", err)
+    }
+
+    var data Pool
+    doc.DataTo(&data)
+
+    go userJoined(user, collection)
+
+    if FindUser(user, data.Members) == -1 {
+        data.Members = append(data.Members, user)
+        if idx := FindUser(user, data.Requests); idx != -1 {
+            data.Requests = RemoveUser(idx, data.Requests)
+        }
+        db.UpdateDoc(docRef, data)
+    }
+
+    return nil
+}
+
+func ReqJoinPool(user model.UserSlice, poolId string, collection *firestore.CollectionRef) error {
+    docRef, doc, err := db.GetDocRef(collection, poolId)
+    if err != nil {
+        return fmt.Errorf("Document could be found: %v", err)
+    }
+
+    var data Pool
+    doc.DataTo(&data)
+
+    if FindUser(user, data.Requests) == -1 {
+        data.Members = append(data.Requests, user)
+        db.UpdateDoc(docRef, data)
+    }
+
+    return nil
+}
+
+func LeavePool(user model.UserSlice, poolId string, collection *firestore.CollectionRef) error {
+    docRef, doc, err := db.GetDocRef(collection, poolId)
+    if err != nil {
+        return fmt.Errorf("Document could be found: %v", err)
+    }
+
+    var data Pool
+    doc.DataTo(&data)
+
+    if idx := FindUser(user, data.Members); idx != -1 {
+        data.Members = RemoveUser(idx, data.Members)
+        db.UpdateDoc(docRef, data)
+    }
+
+    return nil
+}
+
+func userJoined(user model.UserSlice, colRef *firestore.CollectionRef) {
+    q := colRef.Where("requests", "array-contains", user)
+    snaps, _ := db.GetQueryDocs(q)
+
+    var data Pool
+    for _, snap := range snaps {
+        snap.DataTo(&data)
+        if idx := FindUser(user, data.Requests); idx != -1 {
+            data.Requests = RemoveUser(idx, data.Members)
+            db.UpdateDoc(snap.Ref, data)
+        }
+    }
 }
