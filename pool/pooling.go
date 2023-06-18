@@ -28,7 +28,7 @@ func GetPools(gender uint8, start, end model.Location, distance float64, poolRef
     if distance <= 150 {
         startHashs = []string{start.GeoHash}
     } else if distance <= 300 {
-        startHashs = get300mBox(start.GeoHash)
+        startHashs = Get300mBox(start.GeoHash)
     } else if distance <= 600 {    
         startHashs = get600mBox(start.GeoHash)
     } else {
@@ -120,10 +120,11 @@ func JoinPool(user model.UserSlice, poolId string, collection *firestore.Collect
     return nil
 }
 
-func ReqJoinPool(user model.UserSlice, poolId string, collection *firestore.CollectionRef) error {
+func ReqJoinPool(user model.UserSlice, poolId string, collection *firestore.CollectionRef) (model.Location, error) {
     docRef, doc, err := db.GetDocRef(collection, poolId)
     if err != nil {
-        return fmt.Errorf("Document could be found: %v", err)
+        var temp model.Location
+        return temp, fmt.Errorf("Document could be found: %v", err)
     }
 
     var data Pool
@@ -134,7 +135,7 @@ func ReqJoinPool(user model.UserSlice, poolId string, collection *firestore.Coll
         db.UpdateDoc(docRef, data)
     }
 
-    return nil
+    return data.Start, nil 
 }
 
 func LeavePool(user model.UserSlice, poolId string, collection *firestore.CollectionRef) error {

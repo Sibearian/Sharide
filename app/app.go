@@ -14,6 +14,7 @@ import (
 var app *firebase.App
 var fs *firestore.Client
 var poolRef *firestore.CollectionRef
+var rideRef *firestore.CollectionRef
 
 func Start(){
     var err error
@@ -30,6 +31,7 @@ func Start(){
     defer fs.Close()
 
     poolRef = db.GetCollectionRef(fs, "pools")
+    rideRef = db.GetCollectionRef(fs, "ride")
 
     // Pool apis
     router.HandleFunc("/pool/create", createPool).Methods("POST")
@@ -39,6 +41,9 @@ func Start(){
     router.HandleFunc("/pool/start", startPool).Methods("POST")
     router.HandleFunc("/pool/end", endPool).Methods("POST")
     router.HandleFunc("/pool/req_join", reqPool).Methods("POST")
+
+    // Ride apis
+    router.HandleFunc("/ride/create", createRide).Methods("POST")
 
     
     log.Fatal(http.ListenAndServe(":8080", router))

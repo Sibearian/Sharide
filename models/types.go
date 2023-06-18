@@ -29,15 +29,27 @@ type UserSlice struct {
 }
 
 func (a Location) DistanceTo(b Location) float64 {
-    var rlat1 float64 = a.Lat * (math.Pi / 180)
-    var rlat2 float64 = b.Lat * (math.Pi / 180)
-
-    var difflat = rlat2 - rlat1
-    var difflon = (a.Lng - b.Lng) * (math.Pi / 180)
-
-    return 2 * 6371.07103 * math.Asin(math.Sqrt(math.Sin(difflat / 2) * math.Sin(difflat / 2) + math.Cos(rlat1) * math.Cos(rlat2) * math.Sin(rlat2) * math.Sin(difflon / 2) * math.Sin(difflon / 2)))
+    lat1, lng1 := a.Lat, a.Lng
+    lat2, lng2 := b.Lat, b.Lng
+    
+    radlat1 := float64(math.Pi * lat1 / 180)
+	radlat2 := float64(math.Pi * lat2 / 180)
+	
+	theta := float64(lng1 - lng2)
+	radtheta := float64(math.Pi * theta / 180)
+	
+	dist := math.Sin(radlat1) * math.Sin(radlat2) + math.Cos(radlat1) * math.Cos(radlat2) * math.Cos(radtheta);
+	if dist > 1 {
+		dist = 1
+	}
+	
+	dist = math.Acos(dist)
+	dist = dist * 180 / math.Pi
+	dist = dist * 60 * 1.1515
+    dist = dist * 1.609344
+	
+	return dist
 }
-
 
 func (loc *Location) Hash() {
     loc.GeoHash = geohash.Encode(loc.Lat, loc.Lng, 7)

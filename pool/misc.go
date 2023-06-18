@@ -34,7 +34,7 @@ func StructToMap(obj interface{}) (newMap map[string]interface{}, err error) {
     return
 }
 
-func get300mBox(hash string) []string {
+func Get300mBox(hash string) []string {
     neighbors, _ := geohash.GetNeighbors(hash)
     return []string{
         hash,
@@ -53,8 +53,8 @@ func get600mBox(hash string) (res []string) {
     var hashs map[string]bool
     hashs = make(map[string]bool)
 
-    for _, hash1 := range get300mBox(hash) {
-        for _, hash2 := range get300mBox(hash1) {
+    for _, hash1 := range Get300mBox(hash) {
+        for _, hash2 := range Get300mBox(hash1) {
             hashs[hash2] = true
         }
     }

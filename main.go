@@ -4,5 +4,5 @@ package main
 import "ShaRide/app"
 
 func main() {
-    app.Start()
+	app.Start()
 }
