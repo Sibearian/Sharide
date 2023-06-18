@@ -184,7 +184,8 @@ func reqPool(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    if err = pool.ReqJoinPool(userReq.User, userReq.PoolId, poolRef); err != nil {
+    location, err := pool.ReqJoinPool(userReq.User, userReq.PoolId, poolRef)
+    if err != nil {
         sendData(w, http.StatusInternalServerError, map[string]string{
             "status"  : "ERROR",
             "error"   : "Server Error",
@@ -192,8 +193,6 @@ func reqPool(w http.ResponseWriter, r *http.Request) {
         return
     }
     
-    sendData(w, http.StatusOK, map[string]string{
-        "Status"  : "OK",
-    })
+    sendData(w, http.StatusOK, location)
     return 
 }
