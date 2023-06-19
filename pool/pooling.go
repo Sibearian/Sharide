@@ -99,7 +99,7 @@ func EndPool(poolid string, poolRef *firestore.CollectionRef) error {
 
 
 func JoinPool(user model.UserSlice, poolId string, collection *firestore.CollectionRef) error {
-    docRef, doc, err := db.GetDocRef(collection, poolId)
+    _, doc, err := db.GetDocRef(collection, poolId)
     if err != nil {
         return fmt.Errorf("Document could be found: %v", err)
     }
@@ -108,14 +108,6 @@ func JoinPool(user model.UserSlice, poolId string, collection *firestore.Collect
     doc.DataTo(&data)
 
     go userJoined(user, collection)
-
-    if FindUser(user, data.Members) == -1 {
-        data.Members = append(data.Members, user)
-        if idx := FindUser(user, data.Requests); idx != -1 {
-            data.Requests = RemoveUser(idx, data.Requests)
-        }
-        db.UpdateDoc(docRef, data)
-    }
 
     return nil
 }
@@ -131,7 +123,7 @@ func ReqJoinPool(user model.UserSlice, poolId string, collection *firestore.Coll
     doc.DataTo(&data)
 
     if FindUser(user, data.Requests) == -1 {
-        data.Members = append(data.Requests, user)
+        data.Requests = append(data.Requests, user)
         db.UpdateDoc(docRef, data)
     }
 

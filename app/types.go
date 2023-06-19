@@ -3,6 +3,7 @@ package app
 
 import (
 	"ShaRide/models"
+	"ShaRide/share"
 	"encoding/json"
 	"net/http"
 )
@@ -24,4 +25,10 @@ func sendData(w http.ResponseWriter, status int, send interface{}) {
     (w).WriteHeader(http.StatusOK)
     (w).Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(send)
+}
+
+type ReqRide struct {
+    Rider share.Share `json:"rider"`
+    Dist  float64     `json:"start_distance"`
+
 }

@@ -4,14 +4,12 @@ package share
 import "ShaRide/models"
 
 type Share struct {
-    Userid  string          `firestore:"userid" json:"userid"`
-    IsDrivr bool            `firestore:"is_driver" json:"is_driver"`
-    Gender  uint8           `firestore:"gender" json:"gender"`
+    User    models.UserSlice`firestore:"user" json:"user"`
     PrefGen uint8           `firestore:"pref_gender" json:"pref_gender"`
     Start   models.Location `firestore:"start" json:"start"`
     End     models.Location `firestore:"end" json:"end"`
-    Req     []models.UserSlice`firestore:"req_userid"`
-    Accept  models.UserSlice`firestore:"accepted"`
+    Req     []models.UserSlice`firestore:"req"`
+    Accept  string          `firestore:"accepted"`
     RStatus uint8           `firestore:"ride_status"`
 }
 

@@ -4,6 +4,7 @@ package app
 import (
 	"ShaRide/share"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -35,4 +36,27 @@ func createRide(w http.ResponseWriter, r *http.Request) {
     return 
 }
 
+func getRiders(w http.ResponseWriter, r *http.Request) {
+    var ride ReqRide
 
+    err := json.NewDecoder(r.Body).Decode(&ride)
+    if err != nil {
+        sendData(w, http.StatusBadRequest, map[string]string{
+            "status"  : "ERROR",
+            "error"   : "json is in wrong format",
+        })
+        return
+    }
+
+    rides, err := share.GetPassangers(ride.Rider, ride.Dist, rideRef)
+    if err != nil {
+        sendData(w, http.StatusInternalServerError, map[string]string{
+            "status"  : "ERROR", 
+            "error"   : fmt.Sprintf("%v", err),
+        })
+        return
+    }
+
+    sendData(w, http.StatusOK, rides)
+    return 
+}

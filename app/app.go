@@ -46,6 +46,6 @@ func Start(){
     router.HandleFunc("/ride/create", createRide).Methods("POST")
 
     
-    log.Fatal(http.ListenAndServe(":8080", router))
+    log.Fatal(http.ListenAndServe("192.168.12.35:6969", router))
 }
 

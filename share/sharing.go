@@ -3,6 +3,7 @@ package share
 
 import (
 	"ShaRide/db"
+	"ShaRide/models"
 	"ShaRide/pool"
 	"fmt"
 
@@ -37,7 +38,13 @@ func GetPassangers(user Share, dist float64, shareRef *firestore.CollectionRef) 
     genderFilter:= firestore.PropertyFilter{
         Path: "pref_gender",
         Operator: "==",
-        Value: user.Gender,
+        Value: user.User.Gender,
+    }
+
+    gen2Filter  := firestore.PropertyFilter{
+        Path: "user.gender",
+        Operator: "==",
+        Value: user.PrefGen,
     }
 
     driverFilter:= firestore.PropertyFilter{
@@ -53,7 +60,7 @@ func GetPassangers(user Share, dist float64, shareRef *firestore.CollectionRef) 
     }
 
     q := firestore.AndFilter{
-        Filters: []firestore.EntityFilter{endFilter, genderFilter, driverFilter, statusFilter},
+        Filters: []firestore.EntityFilter{endFilter, genderFilter, driverFilter, statusFilter, gen2Filter},
     }
 
     snaps, err := db.GetQueryDocs(shareRef.WhereEntity(q))
@@ -62,7 +69,6 @@ func GetPassangers(user Share, dist float64, shareRef *firestore.CollectionRef) 
     }
 
     var filter Share 
-    // filter based on the passenger filter also
     for _, snap := range snaps {
         snap.DataTo(&filter)        
         fmt.Println(filter.Start.DistanceTo(user.End))
@@ -84,11 +90,73 @@ func StartShare(shareId string, shareRef *firestore.CollectionRef) error {
     })
 }
 
-func EndPool(shareid string, shareRef *firestore.CollectionRef) error {
+func PickUpShare(shareId string, shareRef *firestore.CollectionRef) error {
+    return db.UpdateDocField(shareRef, shareId, []firestore.Update{
+        {
+            Path: "ride_status",
+            Value: 2,
+        },
+    })
+}
+
+func EndShare(shareid string, shareRef *firestore.CollectionRef) error {
     return db.UpdateDocField(shareRef, shareid, []firestore.Update{
         {
             Path: "ride_status",
             Value: 2,
         }, 
     })
+}
+
+func JoinShare(user models.UserSlice, shareid string, shareRef *firestore.CollectionRef) error {
+    _, doc, err := db.GetDocRef(shareRef, shareid)
+    if err != nil {
+        return fmt.Errorf("Document could be found: %v", err)
+    }
+
+    var data Share
+    doc.DataTo(&data)
+
+    go userJoined(user, shareRef)
+
+    db.UpdateDocField(shareRef, shareid, []firestore.Update{
+        {
+            Path: "accepted",
+            Value: user,
+        },
+    })
+
+
+    return nil
+}
+
+func userJoined(user models.UserSlice, ref *firestore.CollectionRef) {
+    q := ref.Where("requests", "array-contains", user)
+    snaps, _ := db.GetQueryDocs(q)
+
+    var data Share
+    for _, snap := range snaps {
+        snap.DataTo(&data)
+        if idx := findRider(user, data.Req); idx != -1 {
+            data.Req = removeRider(idx, data.Req)
+            db.UpdateDoc(snap.Ref, data)
+        }
+    }
+}
+
+func ReqJoinShare(user models.UserSlice, shareId string, shareRef *firestore.CollectionRef) error {
+    docRef, doc, err := db.GetDocRef(shareRef, shareId)
+    if err != nil {
+        return fmt.Errorf("Document could not be found: %v", err)
+    }
+
+    var data Share
+    doc.DataTo(&data)
+
+    if findRider(user, data.Req) == -1 {
+        data.Req = append(data.Req, user)
+        db.UpdateDoc(docRef, data)
+    }
+
+    return nil
 }
