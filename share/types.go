@@ -8,9 +8,9 @@ type Share struct {
     PrefGen uint8           `firestore:"pref_gender" json:"pref_gender"`
     Start   models.Location `firestore:"start" json:"start"`
     End     models.Location `firestore:"end" json:"end"`
-    Req     []models.UserSlice`firestore:"req"`
-    Accept  string          `firestore:"accepted"`
-    RStatus uint8           `firestore:"ride_status"`
+    Req     []models.UserSlice`firestore:"req" json:"-"`
+    Accept  models.UserSlice`firestore:"accepted" json:"-"`
+    RStatus uint8           `firestore:"ride_status" json:"-"`
 }
 
 func findRider(rider models.UserSlice, requests []models.UserSlice) (int) {

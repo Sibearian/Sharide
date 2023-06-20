@@ -53,8 +53,10 @@ func Start() {
 	router.HandleFunc("/ride/pickup", pickupRide).Methods("POST")
 	router.HandleFunc("/ride/end", endRide).Methods("POST")
 
-    // Feedback api
-    router.HandleFunc("user/feedback", giveRating).Methods("POST")
+	// User api
+	router.HandleFunc("/user/feedback", giveRating).Methods("POST")
+	router.HandleFunc("/user/set", setUser).Methods("POST")
+	router.HandleFunc("/user/get", getUser).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

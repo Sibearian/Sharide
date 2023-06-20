@@ -20,7 +20,7 @@ type User struct{
 type Location struct {
     Lat     float64 `json:"lat" firestore:"lat"`
     Lng     float64 `json:"lng" firestore:"lng"`
-    GeoHash    string  `firestore:"hash"`
+    GeoHash    string  `firestore:"hash" json:"-"`
 }
 
 type UserSlice struct {
@@ -48,7 +48,7 @@ func (a Location) DistanceTo(b Location) float64 {
 	dist = dist * 60 * 1.1515
     dist = dist * 1.609344
 	
-	return dist
+	return dist * 1000
 }
 
 func (loc *Location) Hash() {

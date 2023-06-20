@@ -37,6 +37,10 @@ type shareId struct {
 }
 
 type feedbackReq struct {
-	Userid	string `json:"userid"`
-	Rating	uint8  `json:"rating"`
+	Userid string `json:"userid"`
+	Rating uint8  `json:"rating"`
+}
+
+type userId struct {
+	UserId string `json:"userid"`
 }

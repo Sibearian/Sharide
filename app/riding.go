@@ -80,9 +80,7 @@ func startRide(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sendData(w, http.StatusOK, map[string]models.Location{
-		"start": loc,
-	})
+	sendData(w, http.StatusOK, loc)
 	return
 }
 

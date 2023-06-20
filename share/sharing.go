@@ -47,12 +47,6 @@ func GetPassangers(user Share, dist float64, shareRef *firestore.CollectionRef) 
 		Value:    user.PrefGen,
 	}
 
-	driverFilter := firestore.PropertyFilter{
-		Path:     "is_driver",
-		Operator: "==",
-		Value:    false,
-	}
-
 	statusFilter := firestore.PropertyFilter{
 		Path:     "ride_status",
 		Operator: "==",
@@ -60,7 +54,7 @@ func GetPassangers(user Share, dist float64, shareRef *firestore.CollectionRef) 
 	}
 
 	q := firestore.AndFilter{
-		Filters: []firestore.EntityFilter{endFilter, genderFilter, driverFilter, statusFilter, gen2Filter},
+		Filters: []firestore.EntityFilter{endFilter, genderFilter, statusFilter, gen2Filter},
 	}
 
 	snaps, err := db.GetQueryDocs(shareRef.WhereEntity(q))
@@ -68,11 +62,13 @@ func GetPassangers(user Share, dist float64, shareRef *firestore.CollectionRef) 
 		return nil, err
 	}
 
+	fmt.Println(snaps)
+
 	var filter Share
 	for _, snap := range snaps {
 		snap.DataTo(&filter)
 		fmt.Println(filter.Start.DistanceTo(user.End))
-		if filter.Start.DistanceTo(user.End) >= dist {
+		if filter.Start.DistanceTo(user.End) <= dist {
 			continue
 		}
 		res[snap.Ref.ID] = filter
@@ -81,16 +77,17 @@ func GetPassangers(user Share, dist float64, shareRef *firestore.CollectionRef) 
 	return res, nil
 }
 
-func StartShare(shareId string, shareRef *firestore.CollectionRef) (models.Location, error) {
-	err := db.UpdateDocField(shareRef, shareId, []firestore.Update{
+func StartShare(shareId string, shareRef *firestore.CollectionRef) (res models.Location, err error) {
+	err = db.UpdateDocField(shareRef, shareId, []firestore.Update{
 		{
 			Path:  "ride_status",
 			Value: 1,
 		},
 	})
-	_, doc, _ := db.GetDocRef(shareRef, shareId)
+
+	_, doc, err := db.GetDocRef(shareRef, shareId)
 	var share Share
-	doc.DataTo(&share)
+	err = doc.DataTo(&share)
 	return share.Start, err
 }
 
@@ -112,7 +109,7 @@ func EndShare(shareid string, shareRef *firestore.CollectionRef) error {
 	return db.UpdateDocField(shareRef, shareid, []firestore.Update{
 		{
 			Path:  "ride_status",
-			Value: 2,
+			Value: 3,
 		},
 	})
 }

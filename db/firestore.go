@@ -17,7 +17,7 @@ func init(){
 
 
 func CreateNewApp() (*firebase.App, error) {
-    conf := &firebase.Config{ProjectID: "mdp-bmsce"}
+    conf := &firebase.Config{ProjectID: "bms-shareride"}
 
     app, err := firebase.NewApp(ctx, conf)
     if err != nil {

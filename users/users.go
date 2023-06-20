@@ -40,6 +40,6 @@ func GetUser(userid string, userRef *firestore.CollectionRef) (*models.User, err
 	return &user, nil
 }
 
-func CreateUser(user models.User, userRef *firestore.CollectionRef) (error) {
+func SetUser(user models.User, userRef *firestore.CollectionRef) (error) {
 	return db.SetDoc(userRef, user.Userid, user)
 }
