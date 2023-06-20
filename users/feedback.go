@@ -27,3 +27,19 @@ func UpdateFeedBack(rating uint8, userid string, userRef *firestore.CollectionRe
 		},
 	})
 }
+
+func GetUser(userid string, userRef *firestore.CollectionRef) (*models.User, error) {
+	_, snap, err := db.GetDocRef(userRef, userid)
+	if err != nil {
+		return nil, err
+	}
+
+	var user models.User
+	snap.DataTo(&user)
+
+	return &user, nil
+}
+
+func CreateUser(user models.User, userRef *firestore.CollectionRef) (error) {
+	return db.SetDoc(userRef, user.Userid, user)
+}

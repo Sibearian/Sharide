@@ -45,6 +45,13 @@ func AddDoc(collection *firestore.CollectionRef, data interface{}) (*firestore.D
     return docRef, nil
 }
 
+func SetDoc(collection *firestore.CollectionRef, docId string, data interface{}) (error) {
+    _, err := collection.Doc(docId).Set(ctx, data)
+    if err != nil {
+        return fmt.Errorf("An error has occured while adding the document: %v", err)
+    }
+    return nil
+}
 
 func UpdateDoc(docRef *firestore.DocumentRef, data interface{}) error {
     _, err := docRef.Set(ctx, data)
