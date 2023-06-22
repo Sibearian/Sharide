@@ -16,7 +16,7 @@ func createRide(w http.ResponseWriter, r *http.Request) {
 		sendData(w, http.StatusBadRequest, map[string]string{
 			"status": "ERROR",
 			"error":  "json is in wrong format",
-		})
+		})	
 		return
 	}
 
@@ -30,7 +30,7 @@ func createRide(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sendData(w, http.StatusOK, map[string]string{
-		"pool_id": docRef.ID,
+		"shareId": docRef.ID,
 	})
 	return
 }

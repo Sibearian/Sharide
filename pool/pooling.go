@@ -53,8 +53,14 @@ func GetPools(gender uint8, start, end model.Location, distance float64, poolRef
 		Value:    0,
 	}
 
+	seatsFilter := firestore.PropertyFilter{
+		Path:     "seats",
+		Operator: "!=",
+		Value:    0,
+	}
+
 	query := firestore.AndFilter{
-		Filters: []firestore.EntityFilter{startQuery, genderFilter, statusFilter},
+		Filters: []firestore.EntityFilter{startQuery, genderFilter, statusFilter, seatsFilter},
 	}
 
 	docs, err := db.GetQueryDocs(poolRef.WhereEntity(query))
@@ -103,7 +109,6 @@ func JoinPool(user model.UserSlice, poolId string, collection *firestore.Collect
 		return fmt.Errorf("Document could be found: %v", err)
 	}
 
-
 	var data Pool
 	doc.DataTo(&data)
 
@@ -111,8 +116,12 @@ func JoinPool(user model.UserSlice, poolId string, collection *firestore.Collect
 		data.Members = append(data.Members, user)
 		db.UpdateDocField(collection, poolId, []firestore.Update{
 			{
-				Path: "members",
+				Path:  "members",
 				Value: data.Members,
+			},
+			{
+				Path:  "seats",
+				Value: data.Seats - 1,
 			},
 		})
 	}

@@ -14,8 +14,8 @@ func RemoveUser(idx int, arr []models.UserSlice) []models.UserSlice {
 	if len(arr) == 0 || cap(arr) == 0 {
 		return arr
 	}
-	arr[idx] = arr[len(arr) - 1]
-	return arr[:len(arr) -1]
+	arr[idx] = arr[len(arr)-1]
+	return arr[:len(arr)-1]
 }
 
 func FindUser(user models.UserSlice, arr []models.UserSlice) (idx int) {
@@ -52,7 +52,7 @@ func get600mBox(hash string) (res []string) {
 		}
 	}
 
-	for k, _ := range hashs {
+	for k := range hashs {
 		res = append(res, k)
 	}
 	return
